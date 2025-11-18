@@ -3,25 +3,26 @@ package mock;
 import org.example.app.interfaces.RepositorioPacientes;
 import org.example.app.interfaces.RepositorioObraSocial;
 import org.example.app.interfaces.RepositorioUsuarios;
-import org.example.domain.Paciente;
-import org.example.domain.ObraSocial;
-import org.example.domain.Usuario;
-import org.example.domain.Afiliado;
+import org.example.app.interfaces.RepositorioIngresos;
+import org.example.domain.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraSocial, RepositorioUsuarios {
+public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraSocial, RepositorioUsuarios, RepositorioIngresos {
     private Map<String, Paciente> pacientes;
     private Map<String, ObraSocial> obrasSociales;
     private Map<String, Usuario> usuarios;
+    private Map<String, Ingreso> ingresos;
+    private Map<String, Atencion> atenciones;
     private Usuario usuarioActual;
 
     public DBPruebaEnMemoria() {
         this.pacientes = new HashMap<>();
         this.obrasSociales = new HashMap<>();
         this.usuarios = new HashMap<>();
+        this.ingresos = new HashMap<>();
+        this.atenciones = new HashMap<>();
         this.usuarioActual = null;
     }
 
@@ -65,6 +66,7 @@ public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraS
         return false;
     }
 
+    // Implementación de RepositorioObraSocial
     @Override
     public void guardarObraSocial(ObraSocial obraSocial) {
         System.out.println("DEBUG: Guardando obra social - Nombre: " + obraSocial.getNombre() +
@@ -82,7 +84,6 @@ public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraS
         return encontrada;
     }
 
-    // Resto del código sin cambios...
     // Implementación de RepositorioUsuarios
     @Override
     public void guardarUsuario(Usuario usuario) {
@@ -108,6 +109,50 @@ public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraS
         this.usuarioActual = usuarioActual;
     }
 
+    // Implementación de RepositorioIngresos
+    @Override
+    public List<Ingreso> obtenerIngresosPendientes() {
+        return ingresos.values().stream()
+                .filter(ingreso -> ingreso.getEstado() == EstadoIngreso.PENDIENTE)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Ingreso> buscarPorId(String id) {
+        return Optional.ofNullable(ingresos.get(id));
+    }
+
+    @Override
+    public void guardarIngreso(Ingreso ingreso) {
+        ingresos.put(ingreso.getId(), ingreso);
+    }
+
+    @Override
+    public void actualizarIngreso(Ingreso ingreso) {
+        ingresos.put(ingreso.getId(), ingreso);
+    }
+
+    @Override
+    public List<Ingreso> obtenerTodos() {
+        return new ArrayList<>(ingresos.values());
+    }
+
+    // Métodos para gestionar Atenciones
+    public void guardarAtencion(Atencion atencion) {
+        atenciones.put(atencion.getId(), atencion);
+        System.out.println("DEBUG: Atención guardada - ID: " + atencion.getId());
+    }
+
+    public Optional<Atencion> buscarAtencionPorIngreso(String idIngreso) {
+        return atenciones.values().stream()
+                .filter(atencion -> atencion.getIngreso().getId().equals(idIngreso))
+                .findFirst();
+    }
+
+    public List<Atencion> obtenerTodasAtenciones() {
+        return new ArrayList<>(atenciones.values());
+    }
+
     // Métodos auxiliares para pruebas
     public Map<String, Paciente> getPacientes() {
         return pacientes;
@@ -121,7 +166,41 @@ public class DBPruebaEnMemoria implements RepositorioPacientes, RepositorioObraS
         return usuarios;
     }
 
+    public Map<String, Ingreso> getIngresos() {
+        return ingresos;
+    }
+
+    public Map<String, Atencion> getAtenciones() {
+        return atenciones;
+    }
+
     public Usuario getUsuarioActual() {
         return usuarioActual;
+    }
+
+    // Método para establecer usuario actual (compatibilidad con step definitions)
+    public void setUsuarioActual(Object usuario) {
+        if (usuario instanceof Usuario) {
+            this.usuarioActual = (Usuario) usuario;
+        } else {
+            this.usuarioActual = null;
+        }
+    }
+
+    public void limpiarIngresos() {
+        ingresos.clear();
+    }
+
+    public void limpiarAtenciones() {
+        atenciones.clear();
+    }
+
+    public void limpiarTodo() {
+        pacientes.clear();
+        obrasSociales.clear();
+        usuarios.clear();
+        ingresos.clear();
+        atenciones.clear();
+        usuarioActual = null;
     }
 }

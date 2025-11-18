@@ -18,7 +18,9 @@ public enum NivelEmergencia {
     public boolean tieneNombre(String nombre){
         return this.nombre.equals(nombre);
     }
-
+    public Integer getPrioridad() {
+        return prioridad;
+    }
     public int compararCon(NivelEmergencia otro){
         return this.prioridad.compareTo(otro.prioridad);
     }

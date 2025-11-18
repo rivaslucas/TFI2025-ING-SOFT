@@ -9,36 +9,36 @@ import org.example.domain.Paciente;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class ServicioUrgencias {
 
-    //SEGREGACION DE INTERFAZ
-    //PATRON ADAPTADOR
     private RepositorioPacientes dbPacientes;
-
     private final List<Ingreso> listaEspera;
 
-    //INYECCION DE DEPENDENCIA -> Pruebas
     public ServicioUrgencias(RepositorioPacientes dbPacientes) {
         this.dbPacientes = dbPacientes;
         this.listaEspera = new ArrayList<>();
     }
 
-
     public void registrarUrgencia(String cuilPaciente,
-                                   Enfermera enfermera,
-                                   String informe,
+                                  Enfermera enfermera,
+                                  String informe,
                                   NivelEmergencia emergencia,
-                                   Float temperatura,
-                                   Float frecuenciaCardiaca,
-                                   Float frecuenciaRespiratoria,
-                                   Float frecuenciaSistolica,
-                                   Float frecuenciaDiastolica){
+                                  Float temperatura,
+                                  Float frecuenciaCardiaca,
+                                  Float frecuenciaRespiratoria,
+                                  Float frecuenciaSistolica,
+                                  Float frecuenciaDiastolica){
         validarCampos(cuilPaciente,enfermera,informe,emergencia,temperatura,frecuenciaCardiaca,frecuenciaRespiratoria,frecuenciaSistolica,frecuenciaDiastolica);
         Paciente paciente = dbPacientes.buscarPacientePorCuil(cuilPaciente)
                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
 
+        // GENERAR UN ID ÚNICO PARA EL INGRESO
+        String idIngreso = UUID.randomUUID().toString();
+
         Ingreso ingreso = new Ingreso(
+                idIngreso, // NUEVO PARÁMETRO: ID
                 paciente,
                 enfermera,
                 informe,
@@ -56,6 +56,7 @@ public class ServicioUrgencias {
     public List<Ingreso> obtenerIngresosPendientes(){
         return this.listaEspera;
     }
+
     public void validarCampos(String cuilPaciente,
                               Enfermera enfermera,
                               String informe,
@@ -115,6 +116,5 @@ public class ServicioUrgencias {
         if (frecuenciaDiastolica == null) {
             throw new RuntimeException("La tensión arterial es obligatoria");
         }
-
     }
 }
