@@ -132,6 +132,11 @@
     flex-direction: column;
     gap: 1.5rem;
 }
+body{
+     margin: 0;
+     padding:0;
+ }
+
 
 .statusCard, .claimCard {
     background: white;
