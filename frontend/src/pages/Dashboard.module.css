@@ -1,0 +1,532 @@
+/* Dashboard.module.css */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.header {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+.headerContent {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    font-size: 3rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 0.75rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.headerTitle {
+    font-size: 1.875rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.headerSubtitle {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.userInfo {
+    text-align: right;
+}
+
+.userEmail {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.logoutButton {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+.logoutButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.patientBanner {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    color: #1f2937;
+    margin: 0 2rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+}
+
+.bannerContent {
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bannerInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pulseDot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: #dc2626;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
+}
+
+.bannerText {
+    font-size: 0.875rem;
+}
+
+.bannerButton {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+.bannerButton:hover {
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.main {
+    padding: 2rem;
+    max-width: 87.5rem;
+    margin: 0 auto;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.actionsTitle {
+    margin-bottom: 1.5rem;
+}
+
+.refreshButton {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.refreshButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.statsSection {
+    margin-bottom: 3rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.statCard {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.statCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+}
+
+.statCard:nth-child(2)::before {
+    background: linear-gradient(135deg, #f59e0b 0%, #f59e0b 100%);
+}
+
+.statCard:nth-child(3)::before {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+.statCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+}
+
+.statIconWaiting {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.statIconUrgent {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.statIconCompleted {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.statValue {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.actionsSection {
+    margin-bottom: 3rem;
+}
+
+.actionsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.actionCard {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.actionCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.actionCard:hover::before {
+    left: 100%;
+}
+
+.actionCard:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
+.actionCard:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.actionCard:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.actionContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.actionIcon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.actionCard:hover .actionIcon {
+    transform: scale(1.1);
+}
+
+.actionText {
+    flex: 1;
+}
+
+.actionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.actionDescription {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.roleSection {
+    margin-top: 3rem;
+}
+
+.roleCard {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.roleTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.roleDescription {
+    font-size: 1rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.roleGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.roleSubtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.roleList {
+    list-style: none;
+    color: #374151;
+}
+
+.roleList li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.roleList li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.roleList li:last-child {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+    }
+
+    .main {
+        padding: 1rem;
+    }
+
+    .headerContent {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .headerLeft {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .headerRight {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .statsGrid,
+    .actionsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .patientBanner {
+        margin: 0 1rem;
+    }
+
+    .sectionHeader {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .bannerContent {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .statValue {
+        font-size: 2.5rem;
+    }
+
+    .actionContent {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .roleGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+        padding: 0.5rem;
+    }
+
+    .headerTitle {
+        font-size: 1.5rem;
+    }
+}
+
+/* Estados de focus para accesibilidad */
+button:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.actionCard:focus-visible {
+    border-color: #2563eb;
+    outline: none;
+}

@@ -1,0 +1,13 @@
+# Configuración específica para application
+server:
+  port: 8081
+
+logging:
+  level:
+    org.example: INFO
+    org.springframework: INFO
+
+spring:
+  web:
+    resources:
+      add-mappings: false

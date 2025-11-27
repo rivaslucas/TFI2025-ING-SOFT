@@ -1,0 +1,13 @@
+# Configuración específica para application-tests
+spring:
+  main:
+    banner-mode: off
+  output:
+    ansi:
+      enabled: never
+
+logging:
+  level:
+    org.example: WARN
+    org.springframework: WARN
+    org.springframework.web: WARN

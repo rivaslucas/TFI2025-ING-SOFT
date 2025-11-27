@@ -1,0 +1,663 @@
+/* ReclamarPaciente.module.css */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 1.5rem;
+    }
+}
+
+.maxW6xl {
+    max-width: 72rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .header {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+    .headerLeft {
+        margin-bottom: 0;
+    }
+}
+
+.headerLogo {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.headerTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+@media (min-width: 768px) {
+    .headerTitle {
+        font-size: 1.875rem;
+    }
+}
+
+.headerSubtitle {
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.backButton:hover {
+    background: #f9fafb;
+}
+
+.syncIndicator {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.syncContent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.syncSpinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #3b82f6;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.syncText {
+    color: #1d4ed8;
+    font-weight: 500;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1280px) {
+    .grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+.leftPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.statusCard, .claimCard {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 1.95rem;
+}
+
+.statusHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.statusTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.refreshButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+    border: none;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background: #e5e7eb;
+}
+
+.refreshButton:disabled {
+    opacity: 0.5;
+}
+
+.smallSpinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #9ca3af;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.statusContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.statusAlert {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 2px solid;
+}
+
+.statusAvailable {
+    background: #dcfce7;
+    border-color: #bbf7d0;
+}
+
+.statusBusy {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.statusIndicator {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.statusDot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+.dotAvailable {
+    background: #059669;
+}
+
+.dotBusy {
+    background: #dc2626;
+}
+
+.statusMessage {
+    font-weight: 600;
+    color: #111827;
+}
+
+.statusDescription {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.emptyIcon {
+    font-size: 2.25rem;
+    color: #d1d5db;
+    margin-bottom: 0.75rem;
+}
+
+.emptyText {
+    color: #6b7280;
+}
+
+.claimTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+
+.message {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.messageSuccess {
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.messageError {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.messageContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.messageIcon {
+    font-size: 1.125rem;
+}
+
+.messageClose {
+    color: #6b7280;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+}
+
+.messageClose:hover {
+    color: #374151;
+}
+
+.claimForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formLabel {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+.inputField {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputField:disabled {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.claimButton {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.claimButton:not(.buttonDisabled) {
+    background: #2563eb;
+    color: white;
+}
+
+.claimButton:not(.buttonDisabled):hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.buttonDisabled {
+    background: #d1d5db;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.buttonLoading, .buttonContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.buttonSpinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.infoCard {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.75rem;
+}
+
+.infoTitle {
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.infoList {
+    color: #1d4ed8;
+    font-size: 0.875rem;
+}
+
+.infoItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.infoItem:last-child {
+    margin-bottom: 0;
+}
+
+.rightPanel {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    height: fit-content;
+    position: sticky;
+    top: 1.5rem;
+}
+
+.patientTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+
+.patientContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.patientCard {
+    background: linear-gradient(135deg, #dcfce7 0%, #ecfdf5 100%);
+    border: 2px solid #bbf7d0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+}
+
+.patientHeader {
+    margin-bottom: 1rem;
+}
+
+.patientStatus {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.statusDotActive {
+    width: 0.75rem;
+    height: 0.75rem;
+    background: #059669;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.patientStatusTitle {
+    font-weight: 700;
+    color: #14532d;
+    font-size: 1.125rem;
+}
+
+.patientInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.infoLabel {
+    font-weight: 500;
+    color: #374151;
+}
+
+.infoValue {
+    font-weight: 600;
+    color: #111827;
+}
+
+.infoValueMono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: #111827;
+    font-size: 0.875rem;
+}
+
+.emergencyBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.stateBadge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.bgRed100 { background-color: #fef2f2; }
+.textRed800 { color: #991b1b; }
+.borderRed200 { border-color: #fecaca; }
+
+.bgOrange100 { background-color: #fff7ed; }
+.textOrange800 { color: #9a3412; }
+.borderOrange200 { border-color: #fed7aa; }
+
+.bgYellow100 { background-color: #fefce8; }
+.textYellow800 { color: #854d0e; }
+.borderYellow200 { border-color: #fef08a; }
+
+.bgBlue100 { background-color: #eff6ff; }
+.textBlue800 { color: #1e40af; }
+.borderBlue200 { border-color: #bfdbfe; }
+
+.bgGreen100 { background-color: #dcfce7; }
+.textGreen800 { color: #166534; }
+.borderGreen200 { border-color: #bbf7d0; }
+
+.bgGray100 { background-color: #f8fafc; }
+.textGray800 { color: #1f2937; }
+.borderGray200 { border-color: #e5e7eb; }
+
+.actionButtons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.attendButton {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: #059669;
+    color: white;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.attendButton:hover:not(:disabled) {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.attendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.releaseButton {
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: 1px solid #fecaca;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.releaseButton:hover:not(:disabled) {
+    background: #fecaca;
+}
+
+.releaseButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.noPatient {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.noPatientIcon {
+    font-size: 3.75rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.noPatientText {
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.noPatientSubtext {
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .actionButtons {
+        flex-direction: column;
+    }
+
+    .infoRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .statusHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .refreshButton {
+        align-self: stretch;
+        justify-content: center;
+    }
+}
