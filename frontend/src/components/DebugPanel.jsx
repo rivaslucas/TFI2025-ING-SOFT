@@ -20,7 +20,7 @@ const DebugPanel = () => {
             for (const test of tests) {
                 try {
                     const startTime = Date.now();
-                    const response = await fetch(`http://localhost:8081/api${test.endpoint}`, {
+                    const response = await fetch(`http://localhost:8080/api${test.endpoint}`, {
                         method: test.method,
                         headers: { 'Content-Type': 'application/json' }
                     });
@@ -67,7 +67,7 @@ const DebugPanel = () => {
 
                 <div className="space-y-2 text-xs">
                     <div>
-                        <strong>Backend:</strong> localhost:8081
+                        <strong>Backend:</strong> localhost:8080
                     </div>
                     <div>
                         <strong>Frontend:</strong> {window.location.origin}
