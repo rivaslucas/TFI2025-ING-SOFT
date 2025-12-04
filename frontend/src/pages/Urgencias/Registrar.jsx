@@ -9,16 +9,16 @@ const RegistrarUrgencia = () => {
     const [message, setMessage] = useState({ type: '', text: '' });
 
     const [formData, setFormData] = useState({
-        cuilPaciente: '23-1234567-9',
-        enfermeraNombre: 'Susana',
-        enfermeraApellido: 'Gimenez',
-        informe: 'Paciente con fiebre alta y dolor abdominal',
+        cuilPaciente: '',
+        enfermeraNombre: '',
+        enfermeraApellido: '',
+        informe: '',
         nivelEmergencia: 'EMERGENCIA',
-        temperatura: 38.5,
-        frecuenciaCardiaca: 90,
-        frecuenciaRespiratoria: 18,
-        tensionSistolica: 120,
-        tensionDiastolica: 80
+        temperatura: 0,
+        frecuenciaCardiaca: 0,
+        frecuenciaRespiratoria: 0,
+        tensionSistolica: 0,
+        tensionDiastolica: 0
     });
 
     const handleChange = (e) => {
@@ -138,7 +138,7 @@ const RegistrarUrgencia = () => {
                                     onChange={handleChange}
                                     className={styles.input}
                                     required
-                                    placeholder="23-1234567-9"
+                                    placeholder=""
                                     disabled={loading}
                                 />
                             </div>

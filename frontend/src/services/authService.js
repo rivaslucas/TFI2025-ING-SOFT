@@ -154,7 +154,7 @@ export const authService = {
     getConnectionStatus() {
         const user = this.getStoredUser();
         return {
-            backend: 'http://localhost:8081',
+            backend: 'http://localhost:8080',
             frontend: window.location.origin,
             userStored: !!user,
             userRole: user?.autoridad,
