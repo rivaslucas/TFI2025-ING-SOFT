@@ -22,3 +22,7 @@ jobs:
 
     - name: Ejecutar tests con Maven
       run: mvn test
+
+    - name: Run Unit Tests Only
+
+      run: mvn test -Dsurefire.excludeJUnit5Engines=cucumber
