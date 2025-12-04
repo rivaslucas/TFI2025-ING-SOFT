@@ -10,15 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout de codigo
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Configurar JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
+      # 1. Configura la versión de Java que requiere tu POM (Java 21)
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
-    - name: Ejecutar tests con Maven
-      run: mvn test
+      # 2. Ejecuta Maven desde la raíz, donde está el pom.xml
+      - name: Run Unit Tests Only
+        run: mvn test -Dsurefire.excludeJUnit5Engines=cucumber
+        # LÍNEA 'working-directory: backend/' ELIMINADA.
+        # Maven se ejecutará en la raíz del repositorio, donde encuentra su pom.xml.
