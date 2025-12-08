@@ -8,4 +8,22 @@ public class TensionArterial {
         this.frecuenciaSistolica = new FrecuenciaSistolica(frecuenciaSistolica);
         this.frecuenciaDiastolica = new FrecuenciaDiastolica(frecuenciaDiastolica);
     }
+
+    // ✅ AGREGAR GETTERS
+    public Float getSistolica() {
+        return frecuenciaSistolica != null ? frecuenciaSistolica.getValor() : null;
+    }
+
+    public Float getDiastolica() {
+        return frecuenciaDiastolica != null ? frecuenciaDiastolica.getValor() : null;
+    }
+
+    // Getters para los objetos completos (opcional)
+    public FrecuenciaSistolica getFrecuenciaSistolicaObject() {
+        return frecuenciaSistolica;
+    }
+
+    public FrecuenciaDiastolica getFrecuenciaDiastolicaObject() {
+        return frecuenciaDiastolica;
+    }
 }

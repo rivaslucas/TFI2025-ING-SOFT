@@ -60,20 +60,13 @@ public class AtencionController {
             System.out.println("🎯 Intentando reclamar paciente para médico: " + medicoMatricula);
             Ingreso ingresoReclamado = servicioReclamoPacientes.reclamarProximoPaciente(medico);
 
-            IngresoResponse response = new IngresoResponse(
-                    ingresoReclamado.getId(),
-                    ingresoReclamado.getPaciente().getNombre(),
-                    ingresoReclamado.getPaciente().getApellido(),
-                    ingresoReclamado.getPaciente().getCuil(),
-                    ingresoReclamado.getNivelEmergencia().name(),
-                    ingresoReclamado.getEstado().name(),
-                    ingresoReclamado.getFechaIngreso(),
-                    ingresoReclamado.getEnfermera().getNombre() + " " + ingresoReclamado.getEnfermera().getApellido()
-            );
+            // ✅ ACTUALIZADO: Devolver datos completos incluyendo triaje
+            IngresoResponse response = crearIngresoResponseCompleto(ingresoReclamado);
 
             System.out.println("✅ RECLAMO EXITOSO - Paciente asignado: " +
                     ingresoReclamado.getPaciente().getNombre() + " " +
                     ingresoReclamado.getPaciente().getApellido());
+            System.out.println("📊 Datos de triaje incluidos en respuesta");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             System.out.println("❌ ERROR en reclamo: " + e.getMessage());
@@ -150,17 +143,9 @@ public class AtencionController {
             System.out.println("📋 SOLICITANDO LISTA DE PACIENTES PENDIENTES");
             List<Ingreso> ingresosPendientes = servicioReclamoPacientes.obtenerIngresosPendientes();
 
+            // ✅ ACTUALIZADO: Usar el método que incluye datos de triaje
             List<IngresoResponse> response = ingresosPendientes.stream()
-                    .map(ingreso -> new IngresoResponse(
-                            ingreso.getId(),
-                            ingreso.getPaciente().getNombre(),
-                            ingreso.getPaciente().getApellido(),
-                            ingreso.getPaciente().getCuil(),
-                            ingreso.getNivelEmergencia().name(),
-                            ingreso.getEstado().name(),
-                            ingreso.getFechaIngreso(),
-                            ingreso.getEnfermera().getNombre() + " " + ingreso.getEnfermera().getApellido()
-                    ))
+                    .map(this::crearIngresoResponseCompleto)
                     .collect(Collectors.toList());
 
             System.out.println("✅ Lista de pendientes obtenida - Total: " + response.size());
@@ -171,7 +156,7 @@ public class AtencionController {
         }
     }
 
-    // ✅ CORREGIDO: Verificar estado del médico con pacienteActual
+    // ✅ CORREGIDO: Verificar estado del médico con pacienteActual CON DATOS DE TRIAJE
     @GetMapping("/medico/{matricula}/estado")
     public ResponseEntity<?> verificarEstadoMedico(@PathVariable String matricula) {
         try {
@@ -193,8 +178,8 @@ public class AtencionController {
             Map<String, Object> pacienteActual = null;
             if (!pacientesUnicos.isEmpty()) {
                 Ingreso ingresoActual = pacientesUnicos.get(0);
-                pacienteActual = crearMapPaciente(ingresoActual);
-                System.out.println("✅ PACIENTE ACTUAL CONFIGURADO: " + pacienteActual.get("pacienteNombre"));
+                pacienteActual = crearMapPacienteCompleto(ingresoActual);
+                System.out.println("✅ PACIENTE ACTUAL CONFIGURADO CON DATOS DE TRIAJE: " + pacienteActual.get("pacienteNombre"));
             } else {
                 System.out.println("ℹ️ No hay paciente actual para médico: " + matricula);
             }
@@ -204,9 +189,9 @@ public class AtencionController {
             response.put("tienePacientesEnProceso", !pacientesUnicos.isEmpty());
             response.put("puedeReclamarPaciente", puedeReclamar);
             response.put("totalPacientesEnProceso", pacientesUnicos.size());
-            response.put("pacienteActual", pacienteActual); // ✅ NUEVO: Campo agregado
+            response.put("pacienteActual", pacienteActual); // ✅ AHORA INCLUYE DATOS DE TRIAJE
             response.put("pacientesEnProceso", pacientesUnicos.stream()
-                    .map(this::crearMapPaciente)
+                    .map(this::crearMapPacienteCompleto)
                     .collect(Collectors.toList()));
 
             System.out.println("✅ Estado médico obtenido - Puede reclamar: " + puedeReclamar);
@@ -218,8 +203,8 @@ public class AtencionController {
         }
     }
 
-    // ✅ NUEVO: Método auxiliar para crear mapa de paciente
-    private Map<String, Object> crearMapPaciente(Ingreso ingreso) {
+    // ✅ ACTUALIZADO: Método auxiliar para crear mapa de paciente CON DATOS DE TRIAJE
+    private Map<String, Object> crearMapPacienteCompleto(Ingreso ingreso) {
         Map<String, Object> pacienteMap = new HashMap<>();
         pacienteMap.put("id", ingreso.getId());
         pacienteMap.put("idIngreso", ingreso.getId());
@@ -230,10 +215,39 @@ public class AtencionController {
         pacienteMap.put("estado", ingreso.getEstado().name());
         pacienteMap.put("fechaIngreso", ingreso.getFechaIngreso());
         pacienteMap.put("enfermeraNombre", ingreso.getEnfermera().getNombre() + " " + ingreso.getEnfermera().getApellido());
+
+        // ✅ NUEVO: Agregar datos de triaje
+        pacienteMap.put("temperatura", ingreso.getTemperatura());
+        pacienteMap.put("frecuenciaCardiaca", ingreso.getFrecuenciaCardiaca());
+        pacienteMap.put("frecuenciaRespiratoria", ingreso.getFrecuenciaRespiratoria());
+        pacienteMap.put("tensionSistolica", ingreso.getTensionSistolica());
+        pacienteMap.put("tensionDiastolica", ingreso.getTensionDiastolica());
+        pacienteMap.put("informeEnfermeria", ingreso.getInforme());
+
         return pacienteMap;
     }
 
-    // ✅ NUEVO ENDPOINT: Obtener pacientes en proceso por médico
+    // ✅ ACTUALIZADO: Método para crear IngresoResponse completo CON DATOS DE TRIAJE
+    private IngresoResponse crearIngresoResponseCompleto(Ingreso ingreso) {
+        return new IngresoResponse(
+                ingreso.getId(),
+                ingreso.getPaciente().getNombre(),
+                ingreso.getPaciente().getApellido(),
+                ingreso.getPaciente().getCuil(),
+                ingreso.getNivelEmergencia().name(),
+                ingreso.getEstado().name(),
+                ingreso.getFechaIngreso(),
+                ingreso.getEnfermera().getNombre() + " " + ingreso.getEnfermera().getApellido(),
+                ingreso.getTemperatura(),
+                ingreso.getFrecuenciaCardiaca(),
+                ingreso.getFrecuenciaRespiratoria(),
+                ingreso.getTensionSistolica(),
+                ingreso.getTensionDiastolica(),
+                ingreso.getInforme()
+        );
+    }
+
+    // ✅ NUEVO ENDPOINT: Obtener pacientes en proceso por médico CON DATOS DE TRIAJE
     @GetMapping("/medico/{matricula}/en-proceso")
     public ResponseEntity<?> obtenerPacientesEnProceso(@PathVariable String matricula) {
         try {
@@ -245,17 +259,9 @@ public class AtencionController {
 
             List<Ingreso> pacientesEnProceso = servicioReclamoPacientes.obtenerPacientesEnProcesoPorMedico(matricula);
 
+            // ✅ ACTUALIZADO: Usar método que incluye datos de triaje
             List<IngresoResponse> response = pacientesEnProceso.stream()
-                    .map(ingreso -> new IngresoResponse(
-                            ingreso.getId(),
-                            ingreso.getPaciente().getNombre(),
-                            ingreso.getPaciente().getApellido(),
-                            ingreso.getPaciente().getCuil(),
-                            ingreso.getNivelEmergencia().name(),
-                            ingreso.getEstado().name(),
-                            ingreso.getFechaIngreso(),
-                            ingreso.getEnfermera().getNombre() + " " + ingreso.getEnfermera().getApellido()
-                    ))
+                    .map(this::crearIngresoResponseCompleto)
                     .collect(Collectors.toList());
 
             System.out.println("✅ Pacientes en proceso obtenidos - Total: " + response.size());
@@ -362,7 +368,7 @@ public class AtencionController {
         }
     }
 
-    // ✅ NUEVO ENDPOINT: Obtener paciente actual del médico
+    // ✅ ACTUALIZADO ENDPOINT: Obtener paciente actual del médico CON DATOS DE TRIAJE
     @GetMapping("/medico/{matricula}/paciente-actual")
     public ResponseEntity<?> obtenerPacienteActual(@PathVariable String matricula) {
         try {
@@ -381,22 +387,43 @@ public class AtencionController {
             // Tomar el primer paciente en proceso como paciente actual
             Ingreso ingresoActual = pacientesEnProceso.get(0);
 
-            IngresoResponse response = new IngresoResponse(
-                    ingresoActual.getId(),
-                    ingresoActual.getPaciente().getNombre(),
-                    ingresoActual.getPaciente().getApellido(),
-                    ingresoActual.getPaciente().getCuil(),
-                    ingresoActual.getNivelEmergencia().name(),
-                    ingresoActual.getEstado().name(),
-                    ingresoActual.getFechaIngreso(),
-                    ingresoActual.getEnfermera().getNombre() + " " + ingresoActual.getEnfermera().getApellido()
-            );
+            // ✅ ACTUALIZADO: Devolver datos completos incluyendo triaje
+            IngresoResponse response = crearIngresoResponseCompleto(ingresoActual);
 
-            System.out.println("✅ Paciente actual obtenido: " + response.getPacienteNombre());
+            System.out.println("✅ Paciente actual obtenido CON DATOS DE TRIAJE: " + response.getPacienteNombre());
+            System.out.println("📊 Temperatura: " + response.getTemperatura());
+            System.out.println("📊 Frecuencia cardíaca: " + response.getFrecuenciaCardiaca());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.out.println("❌ ERROR obteniendo paciente actual: " + e.getMessage());
             return ResponseEntity.internalServerError().body(crearErrorResponse("Error al obtener paciente actual"));
+        }
+    }
+
+    // ✅ NUEVO ENDPOINT: Obtener datos completos de un ingreso específico (para casos donde se necesita más detalle)
+    @GetMapping("/ingreso/{idIngreso}/completo")
+    public ResponseEntity<?> obtenerIngresoCompleto(@PathVariable String idIngreso) {
+        try {
+            System.out.println("🔍 SOLICITANDO DATOS COMPLETOS DE INGRESO: " + idIngreso);
+
+            if (idIngreso == null || idIngreso.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(crearErrorResponse("ID de ingreso es obligatorio"));
+            }
+
+            Ingreso ingreso = repositorioIngresos.buscarPorId(idIngreso)
+                    .orElseThrow(() -> new RuntimeException("Ingreso no encontrado"));
+
+            // ✅ Devolver datos completos usando el método auxiliar
+            IngresoResponse response = crearIngresoResponseCompleto(ingreso);
+
+            System.out.println("✅ Datos completos de ingreso obtenidos para: " + idIngreso);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            System.out.println("❌ ERROR obteniendo ingreso completo: " + e.getMessage());
+            return ResponseEntity.badRequest().body(crearErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("💥 ERROR INTERNO: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(crearErrorResponse("Error interno al obtener datos del ingreso"));
         }
     }
 

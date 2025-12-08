@@ -1,6 +1,7 @@
+// FrecuenciaDiastolica.java
 package org.example.domain.valueobject;
 
-public class FrecuenciaDiastolica extends Frecuencia{
+public class FrecuenciaDiastolica extends Frecuencia {
 
     public FrecuenciaDiastolica(Float value) {
         super(value);
@@ -14,5 +15,10 @@ public class FrecuenciaDiastolica extends Frecuencia{
     @Override
     public String getValorFormateado() {
         return "";
+    }
+
+    // ✅ AGREGAR GETTER PARA EL VALOR
+    public Float getValor() {
+        return value;
     }
 }

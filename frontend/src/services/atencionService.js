@@ -206,6 +206,114 @@ export const atencionService = {
         }
     },
 
+    // ✅ NUEVO: Obtener datos completos del ingreso incluyendo triaje
+    async obtenerDatosIngresoCompleto(idIngreso) {
+        try {
+            console.log('📋 Obteniendo datos completos del ingreso:', idIngreso);
+
+            const response = await api.get(`/atenciones/ingreso/${idIngreso}/completo`);
+
+            console.log('✅ Datos de ingreso obtenidos:', response.data);
+
+            return {
+                success: true,
+                data: response.data,
+                message: 'Datos de ingreso obtenidos correctamente'
+            };
+        } catch (error) {
+            console.error('❌ Error al obtener datos del ingreso:', error);
+
+            return {
+                success: false,
+                error: 'Error al obtener datos del ingreso',
+                details: error.response?.data
+            };
+        }
+    },
+
+    // ✅ MEJORADO: Obtener paciente actual del médico - VERSIÓN CORREGIDA
+    async obtenerPacienteActual(medicoMatricula) {
+        try {
+            console.log('🔍 Obteniendo paciente actual del médico:', medicoMatricula);
+
+            const response = await api.get(`/atenciones/medico/${medicoMatricula}/paciente-actual`);
+
+            console.log('✅ Paciente actual obtenido:', response.data);
+
+            return {
+                success: true,
+                data: response.data,
+                message: 'Paciente actual obtenido correctamente'
+            };
+        } catch (error) {
+            console.error('❌ Error al obtener paciente actual:', error);
+
+            // Si no hay paciente actual (404), devolver success: false
+            if (error.response?.status === 404) {
+                return {
+                    success: false,
+                    data: null,
+                    error: 'No hay paciente actual asignado',
+                    message: 'No hay paciente actual'
+                };
+            }
+
+            // Para otros errores
+            return {
+                success: false,
+                error: 'Error al obtener paciente actual',
+                details: error.response?.data
+            };
+        }
+    },
+
+    // ✅ NUEVO: Obtener datos de triaje específicos
+    async obtenerDatosTriaje(idIngreso) {
+        try {
+            console.log('📊 Obteniendo datos de triaje para ingreso:', idIngreso);
+
+            // Primero intentar con el endpoint completo
+            try {
+                const response = await api.get(`/atenciones/ingreso/${idIngreso}/completo`);
+                console.log('✅ Datos de triaje obtenidos:', response.data);
+
+                return {
+                    success: true,
+                    data: response.data,
+                    message: 'Datos de triaje obtenidos correctamente'
+                };
+            } catch (error) {
+                // Si falla, intentar con el endpoint de paciente-actual
+                console.log('⚠️ Endpoint completo no disponible, intentando alternativa...');
+
+                // Obtener estado médico para buscar paciente actual
+                const estadoResponse = await this.obtenerEstadoMedico('67890'); // Usar matrícula del médico
+
+                if (estadoResponse.success && estadoResponse.data.pacienteActual) {
+                    const pacienteActual = estadoResponse.data.pacienteActual;
+
+                    // Verificar que el ID coincida
+                    if (pacienteActual.id === idIngreso) {
+                        return {
+                            success: true,
+                            data: pacienteActual,
+                            message: 'Datos de triaje obtenidos del paciente actual'
+                        };
+                    }
+                }
+
+                throw new Error('No se pudieron obtener datos de triaje');
+            }
+        } catch (error) {
+            console.error('❌ Error al obtener datos de triaje:', error);
+            return {
+                success: false,
+                error: 'No se pudieron cargar los datos de triaje',
+                details: error.message
+            };
+        }
+    },
+
     // ✅ NUEVO: Obtener historial de atenciones del médico
     async obtenerHistorialAtenciones(medicoMatricula, pagina = 0, tamaño = 10) {
         try {
@@ -294,40 +402,6 @@ export const atencionService = {
         }
     },
 
-    // ✅ NUEVO: Obtener paciente actual del médico
-    async obtenerPacienteActual(medicoMatricula) {
-        try {
-            console.log('🔍 Obteniendo paciente actual del médico:', medicoMatricula);
-
-            const response = await api.get(`/atenciones/medico/${medicoMatricula}/paciente-actual`);
-
-            console.log('✅ Paciente actual obtenido:', response.data);
-
-            return {
-                success: true,
-                data: response.data,
-                message: 'Paciente actual obtenido correctamente'
-            };
-        } catch (error) {
-            console.error('❌ Error al obtener paciente actual:', error);
-
-            // Si no hay paciente actual, no es un error
-            if (error.response?.status === 404) {
-                return {
-                    success: true,
-                    data: null,
-                    message: 'No hay paciente actual'
-                };
-            }
-
-            return {
-                success: false,
-                error: 'Error al obtener paciente actual',
-                details: error.response?.data
-            };
-        }
-    },
-
     // ✅ NUEVO: Liberar todos los pacientes del médico (para casos de error)
     async liberarTodosPacientes(medicoMatricula) {
         try {
@@ -400,6 +474,63 @@ export const atencionService = {
                 success: false,
                 error: 'Error al sincronizar estado',
                 details: error.message
+            };
+        }
+    },
+
+    // ✅ NUEVO: Método auxiliar para obtener datos de paciente con diferentes estrategias
+    async obtenerDatosPacienteCompletos(idIngreso, medicoMatricula) {
+        try {
+            console.log('🔍 Obteniendo datos completos del paciente:', { idIngreso, medicoMatricula });
+
+            // Estrategia 1: Intentar con endpoint específico
+            try {
+                const response = await api.get(`/atenciones/ingreso/${idIngreso}/completo`);
+                if (response.data) {
+                    console.log('✅ Datos obtenidos del endpoint completo');
+                    return {
+                        success: true,
+                        data: response.data,
+                        source: 'endpoint_completo'
+                    };
+                }
+            } catch (error) {
+                console.log('⚠️ Endpoint completo no disponible');
+            }
+
+            // Estrategia 2: Obtener paciente actual y verificar que coincida
+            const pacienteActual = await this.obtenerPacienteActual(medicoMatricula);
+            if (pacienteActual.success && pacienteActual.data && pacienteActual.data.id === idIngreso) {
+                console.log('✅ Datos obtenidos del paciente actual');
+                return {
+                    success: true,
+                    data: pacienteActual.data,
+                    source: 'paciente_actual'
+                };
+            }
+
+            // Estrategia 3: Obtener estado médico y buscar en la lista
+            const estadoMedico = await this.obtenerEstadoMedico(medicoMatricula);
+            if (estadoMedico.success && estadoMedico.data.pacienteActual) {
+                const paciente = estadoMedico.data.pacienteActual;
+                if (paciente.id === idIngreso) {
+                    console.log('✅ Datos obtenidos del estado médico');
+                    return {
+                        success: true,
+                        data: paciente,
+                        source: 'estado_medico'
+                    };
+                }
+            }
+
+            // Si ninguna estrategia funciona
+            throw new Error('No se pudieron obtener los datos del paciente');
+
+        } catch (error) {
+            console.error('❌ Error obteniendo datos del paciente:', error);
+            return {
+                success: false,
+                error: error.message || 'Error al obtener datos del paciente'
             };
         }
     }

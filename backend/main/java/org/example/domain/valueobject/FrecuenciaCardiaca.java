@@ -1,8 +1,8 @@
 package org.example.domain.valueobject;
 
-public class FrecuenciaCardiaca extends Frecuencia{
+public class FrecuenciaCardiaca extends Frecuencia {
 
-    public FrecuenciaCardiaca(Float value){
+    public FrecuenciaCardiaca(Float value) {
         super(value);
     }
 
@@ -16,5 +16,8 @@ public class FrecuenciaCardiaca extends Frecuencia{
         return "";
     }
 
-    //20.5 lmp
+    // ✅ AGREGAR GETTER PARA EL VALOR
+    public Float getValor() {
+        return value; // Accede al campo 'value' de la clase padre
+    }
 }
