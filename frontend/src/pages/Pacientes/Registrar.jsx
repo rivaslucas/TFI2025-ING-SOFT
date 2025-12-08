@@ -52,7 +52,7 @@ const RegistrarPaciente = () => {
 
             if (Array.isArray(obrasSocialesData) && obrasSocialesData.length > 0) {
                 setObrasSociales(obrasSocialesData);
-                console.log(`✅ Se cargaron ${obrasSocialesData.length} obras sociales del backend`);
+                console.log(` Se cargaron ${obrasSocialesData.length} obras sociales del backend`);
             } else {
                 console.warn('⚠️ No se obtuvieron obras sociales del backend, usando lista por defecto');
                 setObrasSociales(obrasSocialesPorDefecto);
@@ -105,14 +105,27 @@ const RegistrarPaciente = () => {
             newErrors['direccion.localidad'] = 'La localidad es obligatoria';
         }
 
-        if (formData.numeroAfiliado && !formData.obraSocialNombre) {
-            newErrors.obraSocialNombre = 'Debe seleccionar una obra social si ingresa número de afiliado';
+        //  NUEVA VALIDACIÓN: Si se selecciona obra social, el número de afiliado es obligatorio
+        if (formData.obraSocialNombre && !formData.obraSocialNombre.trim()) {
+            // Si se selecciona una obra social, verificar que tenga valor
+            if (!formData.obraSocialNombre.trim()) {
+                newErrors.obraSocialNombre = 'Debe seleccionar una obra social válida';
+            }
+        }
+
+        //  VALIDACIÓN DEL NÚMERO DE AFILIADO
+        if (formData.obraSocialNombre && formData.obraSocialNombre.trim()) {
+            // Si hay obra social seleccionada, el número de afiliado es obligatorio
+            if (!formData.numeroAfiliado || !formData.numeroAfiliado.trim()) {
+                newErrors.numeroAfiliado = 'El número de afiliado es obligatorio cuando se selecciona obra social';
+            } else if (formData.numeroAfiliado.trim().length < 3) {
+                newErrors.numeroAfiliado = 'El número de afiliado debe tener al menos 3 caracteres';
+            }
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -136,14 +149,25 @@ const RegistrarPaciente = () => {
             }));
         }
 
-        if (name === 'obraSocialNombre' && !value) {
-            setFormData(prev => ({
-                ...prev,
-                numeroAfiliado: ''
-            }));
+        //  Limpiar error de número de afiliado si se cambia la obra social
+        if (name === 'obraSocialNombre') {
+            if (!value) {
+                setFormData(prev => ({
+                    ...prev,
+                    numeroAfiliado: ''
+                }));
+            }
+            // Limpiar error del número de afiliado cuando se cambia la obra social
+            if (errors.numeroAfiliado) {
+                setErrors(prev => ({ ...prev, numeroAfiliado: '' }));
+            }
+        }
+
+        //  Limpiar error de número de afiliado cuando se escribe en él
+        if (name === 'numeroAfiliado' && errors.numeroAfiliado) {
+            setErrors(prev => ({ ...prev, numeroAfiliado: '' }));
         }
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -165,7 +189,7 @@ const RegistrarPaciente = () => {
             console.log('📨 Resultado COMPLETO recibido:', result);
 
             if (result.success) {
-                console.log('✅ Éxito - Mostrando mensaje:', result.message);
+                console.log(' Éxito - Mostrando mensaje:', result.message);
 
                 setMessage({
                     type: 'success',
@@ -242,11 +266,11 @@ const RegistrarPaciente = () => {
                         }`}>
                             <div className={styles.messageContent}>
                                 {message.type === 'success' ? (
-                                    <span className={styles.messageIcon}>✅</span>
+                                    <span className={styles.messageIcon}></span>
                                 ) : message.type === 'warning' ? (
-                                    <span className={styles.messageIcon}>⚠️</span>
+                                    <span className={styles.messageIcon}>⚠</span>
                                 ) : (
-                                    <span className={styles.messageIcon}>❌</span>
+                                    <span className={styles.messageIcon}></span>
                                 )}
                                 <span>{message.text}</span>
                             </div>
@@ -404,7 +428,7 @@ const RegistrarPaciente = () => {
                                     )}
                                     {!loadingObrasSociales && obrasSociales.length > 0 && (
                                         <p className={styles.successText}>
-                                            ✅ {obrasSociales.length} obras sociales disponibles
+                                             {obrasSociales.length} obras sociales disponibles
                                         </p>
                                     )}
                                     {getFieldError('obraSocialNombre') && (
@@ -415,20 +439,25 @@ const RegistrarPaciente = () => {
                                 <div>
                                     <label className={styles.label}>
                                         Número de Afiliado
+                                        {formData.obraSocialNombre && <span className={styles.required}> *</span>}
                                     </label>
                                     <input
                                         type="text"
                                         name="numeroAfiliado"
                                         value={formData.numeroAfiliado}
                                         onChange={handleChange}
-                                        className={styles.input}
+                                        className={`${styles.input} ${getFieldError('numeroAfiliado') ? styles.inputError : ''}`}
                                         placeholder="Número de afiliado"
                                         disabled={loading || !formData.obraSocialNombre}
+                                        required={!!formData.obraSocialNombre}
                                     />
                                     {!formData.obraSocialNombre && (
                                         <p className={styles.helperText}>
                                             Seleccione una obra social primero
                                         </p>
+                                    )}
+                                    {getFieldError('numeroAfiliado') && (
+                                        <p className={styles.errorText}>{getFieldError('numeroAfiliado')}</p>
                                     )}
                                 </div>
                             </div>
@@ -447,7 +476,7 @@ const RegistrarPaciente = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <span className={styles.buttonIcon}>✅</span>
+                                        <span className={styles.buttonIcon}></span>
                                         Registrar Paciente
                                     </>
                                 )}
