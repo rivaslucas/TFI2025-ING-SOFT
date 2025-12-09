@@ -1,39 +1,177 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { atencionService } from '../../services/atencionService';
+import { useAuth } from '../../context/AuthContext.jsx'; // Importar contexto de autenticación
 import styles from './AtenderPaciente.module.css';
 
-const AtenderPaciente = () => {
+const Atender = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [loading, setLoading] = useState(false);
+    const { user } = useAuth(); // Obtener usuario autenticado
+
+    const [loading, setLoading] = useState(true); // Iniciar en true para mostrar loading
     const [message, setMessage] = useState({ type: '', text: '' });
     const [datosTriaje, setDatosTriaje] = useState(null);
+    const [pacienteInfo, setPacienteInfo] = useState(null);
 
+    // Obtener datos del estado de navegación
     const ingresoFromState = location.state?.ingreso;
 
+    // Usar la matrícula del usuario autenticado
+    const medicoMatricula = user?.matricula || '67890';
+
     const [formData, setFormData] = useState({
-        idIngreso: ingresoFromState?.id || '',
-        medicoMatricula: '67890',
+        idIngreso: '',
+        medicoMatricula: medicoMatricula,
         informeMedico: ''
     });
 
     useEffect(() => {
-        if (ingresoFromState?.id) {
-            const datosTriajeSimulados = {
-                temperatura: 38.5,
-                frecuenciaCardiaca: 90,
-                frecuenciaRespiratoria: 18,
-                tensionSistolica: 120,
-                tensionDiastolica: 80,
-                nivelEmergencia: 'EMERGENCIA',
-                informeEnfermeria: 'Paciente con fiebre alta y dolor abdominal',
-                fechaTriaje: new Date().toISOString(),
-                enfermera: 'Susana Gimenez'
-            };
-            setDatosTriaje(datosTriajeSimulados);
+        const cargarDatosPaciente = async () => {
+            setLoading(true);
+            setMessage({ type: '', text: '' });
+
+            try {
+                // CASO 1: Si tenemos datos del estado de navegación
+                if (ingresoFromState?.id) {
+                    await cargarDatosDesdeEstado(ingresoFromState);
+                }
+                // CASO 2: Si no tenemos datos del estado, obtener el paciente actual del médico
+                else if (formData.medicoMatricula) {
+                    await cargarPacienteActual();
+                }
+                // CASO 3: No hay datos disponibles
+                else {
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('Error cargando datos del paciente:', error);
+                setMessage({
+                    type: 'error',
+                    text: '❌ Error al cargar datos del paciente'
+                });
+                setLoading(false);
+            }
+        };
+
+        cargarDatosPaciente();
+    }, [ingresoFromState, formData.medicoMatricula]);
+
+    const cargarDatosDesdeEstado = async (ingresoData) => {
+        // Configurar datos básicos del paciente desde el estado
+        setPacienteInfo({
+            id: ingresoData.id,
+            nombre: ingresoData.nombre || ingresoData.pacienteNombre,
+            apellido: ingresoData.apellido || ingresoData.pacienteApellido,
+            cuil: ingresoData.cuil || ingresoData.pacienteCuil
+        });
+
+        setFormData(prev => ({
+            ...prev,
+            idIngreso: ingresoData.id
+        }));
+
+        // Verificar si ya vienen datos de triaje en el estado
+        if (ingresoData.datosTriaje) {
+            setDatosTriaje(ingresoData.datosTriaje);
+            setLoading(false);
+        } else {
+            // Si no, intentar obtener datos completos del backend
+            await cargarDatosCompletos(ingresoData.id);
         }
-    }, [ingresoFromState]);
+    };
+
+    const cargarPacienteActual = async () => {
+        try {
+            console.log('🔍 Obteniendo paciente actual del médico:', formData.medicoMatricula);
+
+            const result = await atencionService.obtenerPacienteActual(formData.medicoMatricula);
+
+            if (result.success && result.data) {
+                const pacienteData = result.data;
+
+                // Configurar información del paciente
+                setPacienteInfo({
+                    id: pacienteData.id,
+                    nombre: pacienteData.pacienteNombre,
+                    apellido: pacienteData.pacienteApellido,
+                    cuil: pacienteData.pacienteCuil
+                });
+
+                // Configurar datos de triaje desde la respuesta del backend
+                const triajeData = {
+                    temperatura: pacienteData.temperatura,
+                    frecuenciaCardiaca: pacienteData.frecuenciaCardiaca,
+                    frecuenciaRespiratoria: pacienteData.frecuenciaRespiratoria,
+                    tensionSistolica: pacienteData.tensionSistolica,
+                    tensionDiastolica: pacienteData.tensionDiastolica,
+                    nivelEmergencia: pacienteData.nivelEmergencia,
+                    informeEnfermeria: pacienteData.informeEnfermeria || pacienteData.informe || 'Sin observaciones',
+                    fechaTriaje: pacienteData.fechaIngreso || new Date().toISOString(),
+                    enfermera: pacienteData.enfermeraNombre || 'Enfermera no especificada'
+                };
+
+                setDatosTriaje(triajeData);
+                setFormData(prev => ({
+                    ...prev,
+                    idIngreso: pacienteData.id
+                }));
+
+                console.log('✅ Datos de paciente cargados desde backend:', pacienteData);
+                console.log('✅ Datos de triaje cargados:', triajeData);
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: '❌ No hay paciente asignado actualmente. Por favor, reclame un paciente primero.'
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando paciente actual:', error);
+            setMessage({
+                type: 'error',
+                text: '❌ Error al cargar datos del paciente'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const cargarDatosCompletos = async (idIngreso) => {
+        try {
+            console.log('📋 Obteniendo datos completos del ingreso:', idIngreso);
+
+            // Usar el endpoint de ingreso completo (si está disponible)
+            // O alternativamente, obtener paciente actual y verificar que coincida el ID
+            const result = await atencionService.obtenerPacienteActual(formData.medicoMatricula);
+
+            if (result.success && result.data && result.data.id === idIngreso) {
+                const pacienteData = result.data;
+                const triajeData = {
+                    temperatura: pacienteData.temperatura,
+                    frecuenciaCardiaca: pacienteData.frecuenciaCardiaca,
+                    frecuenciaRespiratoria: pacienteData.frecuenciaRespiratoria,
+                    tensionSistolica: pacienteData.tensionSistolica,
+                    tensionDiastolica: pacienteData.tensionDiastolica,
+                    nivelEmergencia: pacienteData.nivelEmergencia,
+                    informeEnfermeria: pacienteData.informeEnfermeria || pacienteData.informe || 'Sin observaciones',
+                    fechaTriaje: pacienteData.fechaIngreso || new Date().toISOString(),
+                    enfermera: pacienteData.enfermeraNombre || 'Enfermera no especificada'
+                };
+
+                setDatosTriaje(triajeData);
+                console.log('✅ Datos de triaje obtenidos del backend:', triajeData);
+            }
+        } catch (error) {
+            console.error('Error cargando datos completos:', error);
+            // En caso de error, mostrar mensaje pero continuar
+            setMessage({
+                type: 'warning',
+                text: '⚠️ No se pudieron cargar todos los datos de triaje. Continúe con la atención.'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -88,7 +226,7 @@ const AtenderPaciente = () => {
     };
 
     const evaluarSignoVital = (valor, tipo) => {
-        if (!valor) return { estado: 'normal', texto: 'No registrado' };
+        if (!valor && valor !== 0) return { estado: 'normal', texto: 'No registrado' };
 
         switch (tipo) {
             case 'temperatura':
@@ -116,14 +254,32 @@ const AtenderPaciente = () => {
         }
     };
 
-    if (!ingresoFromState) {
+    // Mostrar estado de carga
+    if (loading) {
+        return (
+            <div className={`${styles.minHScreen} ${styles.bgGray50} flex items-center justify-center p-6`}>
+                <div className={`${styles.card} p-8 text-center max-w-md`}>
+                    <div className={styles.spinner} style={{ margin: '0 auto 20px' }}></div>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-4">Cargando datos del paciente...</h1>
+                    <p className="text-gray-600">
+                        Obteniendo información de triaje y signos vitales
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Verificar si tenemos información del paciente
+    const paciente = pacienteInfo || ingresoFromState;
+
+    if (!paciente) {
         return (
             <div className={`${styles.minHScreen} ${styles.bgGray50} flex items-center justify-center p-6`}>
                 <div className={`${styles.card} p-8 text-center max-w-md`}>
                     <div className="text-6xl mb-4">❌</div>
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">Paciente No Encontrado</h1>
                     <p className="text-gray-600 mb-6">
-                        No se encontró información del paciente. Por favor, reclame un paciente primero.
+                        {message.text || 'No se encontró información del paciente. Por favor, reclame un paciente primero.'}
                     </p>
                     <button
                         onClick={() => navigate('/atencion/reclamar')}
@@ -147,6 +303,26 @@ const AtenderPaciente = () => {
                     </p>
                 </div>
 
+                {/* Mostrar mensajes de error o advertencia */}
+                {message.text && message.type !== 'success' && (
+                    <div className={`${styles.message} ${
+                        message.type === 'error' ? styles.messageError : styles.messageWarning
+                    } mb-6`}>
+                        <div className={styles.messageContent}>
+                            <span className={styles.messageIcon}>
+                                {message.type === 'error' ? '❌' : '⚠️'}
+                            </span>
+                            <span className={styles.messageText}>{message.text}</span>
+                        </div>
+                        <button
+                            onClick={() => setMessage({ type: '', text: '' })}
+                            className={styles.messageClose}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                )}
+
                 <div className={styles.grid}>
                     {/* Columna 1: Información del Paciente y Triaje */}
                     <div className={styles.col1}>
@@ -166,7 +342,7 @@ const AtenderPaciente = () => {
                                             Nombre
                                         </label>
                                         <div className={styles.dataField}>
-                                            {ingresoFromState.nombre} {ingresoFromState.apellido}
+                                            {paciente.nombre} {paciente.apellido}
                                         </div>
                                     </div>
                                     <div>
@@ -174,7 +350,7 @@ const AtenderPaciente = () => {
                                             CUIL
                                         </label>
                                         <div className={styles.dataFieldMono}>
-                                            {ingresoFromState.cuil}
+                                            {paciente.cuil}
                                         </div>
                                     </div>
                                 </div>
@@ -185,7 +361,7 @@ const AtenderPaciente = () => {
                                             ID Ingreso
                                         </label>
                                         <div className={styles.dataFieldId}>
-                                            {ingresoFromState.id}
+                                            {formData.idIngreso}
                                         </div>
                                     </div>
                                     <div>
@@ -228,7 +404,9 @@ const AtenderPaciente = () => {
                                         {/* Temperatura */}
                                         <div className={styles.vitalCard}>
                                             <div className={styles.vitalLabel}>Temperatura</div>
-                                            <div className={styles.vitalValue}>{datosTriaje.temperatura}°C</div>
+                                            <div className={styles.vitalValue}>
+                                                {datosTriaje.temperatura != null ? `${datosTriaje.temperatura}°C` : 'No registrado'}
+                                            </div>
                                             <div className={`${styles.vitalStatus} ${
                                                 evaluarSignoVital(datosTriaje.temperatura, 'temperatura').estado === 'alto' ? styles.textRed600 :
                                                     evaluarSignoVital(datosTriaje.temperatura, 'temperatura').estado === 'bajo' ? styles.textBlue600 :
@@ -241,7 +419,9 @@ const AtenderPaciente = () => {
                                         {/* Frecuencia Cardíaca */}
                                         <div className={styles.vitalCard}>
                                             <div className={styles.vitalLabel}>FC</div>
-                                            <div className={styles.vitalValue}>{datosTriaje.frecuenciaCardiaca} lpm</div>
+                                            <div className={styles.vitalValue}>
+                                                {datosTriaje.frecuenciaCardiaca != null ? `${datosTriaje.frecuenciaCardiaca} lpm` : 'No registrado'}
+                                            </div>
                                             <div className={`${styles.vitalStatus} ${
                                                 evaluarSignoVital(datosTriaje.frecuenciaCardiaca, 'frecuenciaCardiaca').estado === 'alto' ? styles.textRed600 :
                                                     evaluarSignoVital(datosTriaje.frecuenciaCardiaca, 'frecuenciaCardiaca').estado === 'bajo' ? styles.textBlue600 :
@@ -254,7 +434,9 @@ const AtenderPaciente = () => {
                                         {/* Frecuencia Respiratoria */}
                                         <div className={styles.vitalCard}>
                                             <div className={styles.vitalLabel}>FR</div>
-                                            <div className={styles.vitalValue}>{datosTriaje.frecuenciaRespiratoria} rpm</div>
+                                            <div className={styles.vitalValue}>
+                                                {datosTriaje.frecuenciaRespiratoria != null ? `${datosTriaje.frecuenciaRespiratoria} rpm` : 'No registrado'}
+                                            </div>
                                             <div className={`${styles.vitalStatus} ${
                                                 evaluarSignoVital(datosTriaje.frecuenciaRespiratoria, 'frecuenciaRespiratoria').estado === 'alto' ? styles.textRed600 :
                                                     evaluarSignoVital(datosTriaje.frecuenciaRespiratoria, 'frecuenciaRespiratoria').estado === 'bajo' ? styles.textBlue600 :
@@ -268,7 +450,9 @@ const AtenderPaciente = () => {
                                         <div className={styles.vitalCard}>
                                             <div className={styles.vitalLabel}>Tensión</div>
                                             <div className={styles.vitalValue}>
-                                                {datosTriaje.tensionSistolica}/{datosTriaje.tensionDiastolica} mmHg
+                                                {datosTriaje.tensionSistolica != null && datosTriaje.tensionDiastolica != null
+                                                    ? `${datosTriaje.tensionSistolica}/${datosTriaje.tensionDiastolica} mmHg`
+                                                    : 'No registrado'}
                                             </div>
                                             <div className={`${styles.vitalStatus} ${
                                                 evaluarSignoVital(datosTriaje.tensionSistolica, 'tensionArterial').estado === 'alto' ? styles.textRed600 :
@@ -287,11 +471,27 @@ const AtenderPaciente = () => {
                                         Observaciones de Enfermería
                                     </label>
                                     <div className={styles.nurseNotes}>
-                                        "{datosTriaje.informeEnfermeria}"
+                                        "{datosTriaje.informeEnfermeria || 'Sin observaciones registradas'}"
                                     </div>
                                     <div className={styles.nurseSignature}>
                                         Por: {datosTriaje.enfermera}
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Mensaje si no hay datos de triaje */}
+                        {!datosTriaje && (
+                            <div className={`${styles.card} ${styles.triageCard}`}>
+                                <h2 className={styles.cardTitle}>
+                                    <span className={styles.iconOrange}>
+                                        📊
+                                    </span>
+                                    Datos de Triaje
+                                </h2>
+                                <div className="p-4 text-center text-gray-500">
+                                    <p>No se pudieron cargar los datos de triaje</p>
+                                    <p className="text-sm mt-2">Puede continuar con la atención médica</p>
                                 </div>
                             </div>
                         )}
@@ -307,15 +507,12 @@ const AtenderPaciente = () => {
                                 Registro de Atención Médica
                             </h2>
 
-                            {message.text && (
-                                <div className={`${styles.message} ${
-                                    message.type === 'success'
-                                        ? styles.messageSuccess
-                                        : styles.messageError
-                                }`}>
+                            {/* Mostrar mensajes de éxito dentro del formulario */}
+                            {message.text && message.type === 'success' && (
+                                <div className={`${styles.message} ${styles.messageSuccess} mb-4`}>
                                     <div className={styles.messageContent}>
                                         <span className={styles.messageIcon}>
-                                            {message.type === 'success' ? '✅' : '❌'}
+                                            ✅
                                         </span>
                                         <span className={styles.messageText}>{message.text}</span>
                                     </div>
@@ -341,7 +538,7 @@ const AtenderPaciente = () => {
                                         className={styles.textarea}
                                         placeholder="Describa el diagnóstico, hallazgos clínicos, tratamiento indicado, medicamentos recetados, estudios complementarios solicitados, recomendaciones y seguimiento..."
                                         required
-                                        disabled={loading}
+                                        disabled={loading || message.type === 'success'}
                                     />
                                     <div className={styles.helperText}>
                                         Incluya: Diagnóstico, Tratamiento, Medicamentos, Estudios, Recomendaciones
@@ -352,7 +549,7 @@ const AtenderPaciente = () => {
                                 <div className={styles.actionButtons}>
                                     <button
                                         type="submit"
-                                        disabled={loading}
+                                        disabled={loading || message.type === 'success'}
                                         className={styles.submitButton}
                                     >
                                         {loading ? (
@@ -372,7 +569,7 @@ const AtenderPaciente = () => {
                                         type="button"
                                         onClick={() => navigate('/atencion/reclamar')}
                                         className={styles.cancelButton}
-                                        disabled={loading}
+                                        disabled={loading || message.type === 'success'}
                                     >
                                         <span>↶</span>
                                         <span>Volver</span>
@@ -403,4 +600,4 @@ const AtenderPaciente = () => {
     );
 };
 
-export default AtenderPaciente;
+export default Atender;
