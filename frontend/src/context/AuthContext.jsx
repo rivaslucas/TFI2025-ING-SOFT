@@ -16,7 +16,9 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        checkAuth();
+        // Se elimina la llamada a checkAuth() para forzar el inicio de sesión en cada carga.
+        // Simplemente se establece loading a false para que la aplicación pueda continuar.
+        setLoading(false);
     }, []);
 
     const checkAuth = async () => {
